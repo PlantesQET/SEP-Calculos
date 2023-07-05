@@ -124,3 +124,51 @@ class Newton:
                 self.__nPV += 1
             else:
                 return 'Erro!'
+    
+    def Sinjetada(self):
+        
+        self.__Sinjetada = dict()
+        self.__deltaPeQ = []
+        self.__ResiduoP = []
+        self.__ResiduoQ = []
+
+        for i in self.__dados:
+            soma1 = []
+            soma2 = []
+            if self.__dados[i]['code'] != 1:
+                for j in self.__dados:
+                    soma1.append(
+                        #Potencia Ativa
+                        abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        mt.cos(np.angle(self.__ybus[i-1][j-1]) 
+                            - self.__dados.get(i)['ang'] 
+                            + self.__dados.get(j)['ang'])
+                    )
+
+                    soma2.append(
+                        #Potencia Reativa
+                        -abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        mt.sin(np.angle(self.__ybus[i-1][j-1]) 
+                            - self.__dados.get(i)['ang'] 
+                            + self.__dados.get(j)['ang'])
+                    )
+                self.__ResiduoP.append(
+                    np.real(
+                        self.__Sesp.get(i)['Pesp'] - sum(soma1)
+                    )
+                )
+                if self.__dados[i]['code'] == 2:
+                    self.__ResiduoQ.append(
+                        np.imag(self.__Sesp.get(i)['Qesp'] * 1j - sum(soma2))
+                    )
+        for i in range(len(self.__ResiduoP)):
+            self.__deltaPeQ.append(self.__ResiduoP[i])
+        for i in range(len(self.__ResiduoQ)):
+            self.__deltaPeQ.append(self.__ResiduoQ[i])
+
+        for i in self.__deltaPeQ: print(i)
+

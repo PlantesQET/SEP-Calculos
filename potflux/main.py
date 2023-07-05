@@ -17,3 +17,5 @@ Exemplo.ligacoes(2,3, impedancia=0.01 + 0.09j)
 Exemplo.printLigacoes()
 
 Exemplo.ybus()
+
+Exemplo.Sinjetada()
