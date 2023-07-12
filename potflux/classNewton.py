@@ -20,6 +20,12 @@ class Newton:
         self.__nPQ = int()
         self.__nPV = int()
 
+        # Submatrizes da Jacobiana
+        self.__J1 = list()
+        self.__J2 = list()
+        self.__J3 = list()
+        self.__J4 = list()
+
     def setBarra(self, barra, code, tensao, ang, carga, geracao):
         """
         codes: 1 - Tensão e Angulo; 2 -> P e Q; 3 -> P e V.
@@ -171,4 +177,116 @@ class Newton:
             self.__deltaPeQ.append(self.__ResiduoQ[i])
 
         for i in self.__deltaPeQ: print(i)
+
+    def __setJ1(self,listAng, nPQ, nPV):
+        """
+        Método privado usado para calcular a submatriz J1 da matriz Jacobiana
+        
+        :param listAng: Lista de angulos a serem calculados no circuito. ( Barras PQ e PV).
+        :param nPQ: numero de barra PQ.
+        :param nPV: número de barras PV.
+
+        return: retorna a matriz J1.
+        """
+        self.__J1 = np.ones((nPQ + nPV, nPQ + nPV))
+
+        mainDiagonal = []
+        outDiagonal = []
+
+        for i in listAng:
+            soma = []
+            for j in range(1,len(self.__dados) + 1, 1):
+                if i != j:
+                    soma.append(
+                        abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        cmt.sin(cmt.phase(self.__ybus[i-1][j-1])- 
+                                self.__dados.get(i)['ang'] +
+                                self.__dados.get(j)['ang']
+                                )
+                    )
+            mainDiagonal.append(sum(soma))
+        
+        for i in listAng:
+            for j in listAng:
+                if i != j:
+                    outDiagonal.append(
+                        -abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        cmt.sin(cmt.phase(self.__ybus[i-1][j-1])- 
+                                self.__dados.get(i)['ang'] +
+                                self.__dados.get(j)['ang']
+                                )
+                    )
+        m = 0
+        for i in range(len(listAng)):
+            for j in range(len(listAng)):
+                if i == j:
+                    self.__J1[i][j] = np.real(mainDiagonal[j])
+                else:
+                    self.__J1[i][j] = np.real(outDiagonal[m])
+                    m += 1
+        
+        print('\n J1 = \n', self.__J1)
+        
+        return self.__J1
+    
+    def __setJ2(self,listTensao, nPQ, nPV):
+        """
+        Método privado usado para calcular a submatriz J2 da matriz Jacobiana
+        
+        :param listTensao: Lista de angulos a serem calculados no circuito. ( Barras PQ e PV).
+        :param nPQ: numero de barra PQ.
+        :param nPV: número de barras PV.
+
+        return: retorna a matriz J1.
+        """
+        self.__J2 = np.ones((nPQ + nPV, nPQ))
+
+        mainDiagonal = []
+        outDiagonal = []
+
+        for i in listTensao:
+            soma = []
+            for j in range(1,len(self.__dados) + 1, 1):
+                if i != j:
+                    soma.append(
+                        abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        cmt.sin(cmt.phase(self.__ybus[i-1][j-1])- 
+                                self.__dados.get(i)['ang'] +
+                                self.__dados.get(j)['ang']
+                                )
+                    )
+            mainDiagonal.append(sum(soma))
+        
+        for i in listTensao:
+            for j in listTensao:
+                if i != j:
+                    outDiagonal.append(
+                        -abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        cmt.sin(cmt.phase(self.__ybus[i-1][j-1])- 
+                                self.__dados.get(i)['ang'] +
+                                self.__dados.get(j)['ang']
+                                )
+                    )
+        m = 0
+        for i in range(len(listAng)):
+            for j in range(len(listAng)):
+                if i == j:
+                    self.__J1[i][j] = np.real(mainDiagonal[j])
+                else:
+                    self.__J1[i][j] = np.real(outDiagonal[m])
+                    m += 1
+        
+        print('\n J1 = \n', self.__J1)
+        
+        return self.__J1
+
+
 
