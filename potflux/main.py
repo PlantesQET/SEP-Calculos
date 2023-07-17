@@ -7,6 +7,7 @@ Exemplo.setBarra(1, 1, 1.04, 0, 0 + 0*1j, 0 + 0*1j)
 Exemplo.setBarra(2, 2, 1.00, 0, 100e6 + 50e6*1j, 0 + 0*1j) # Chutar o valor de tensão em barras PQ
 Exemplo.setBarra(3, 3, 1.02, 0, 0 + 0*1j, 70e6 + 0*1j) # Barra PV
 
+
 Exemplo.printBarra()
 Exemplo.setSesp()
 
@@ -18,4 +19,10 @@ Exemplo.printLigacoes()
 
 Exemplo.ybus()
 
+
+
+
+
 Exemplo.Sinjetada()
+
+Exemplo.setJacob([2], [2,3])
