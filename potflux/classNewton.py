@@ -511,9 +511,8 @@ class Newton:
         m = 0
         for i in range(len(self.__dados)):
             #print('Valor de i agora =', i)
-            
+            #print('Dados =', self.__dados.get(i+1)['code'])
             if self.__dados.get(i+1)['code'] != 1:
-                
                 self.__dados[i + 1]['ang'] += float(np.real(ang[m]))
                 self.__angPlot[i + 1].append(self.__dados[i + 1]['ang'])
                 m += 1
@@ -521,6 +520,7 @@ class Newton:
         m = 0
         for i in range(len(self.__dados)):
             if self.__dados.get(i + 1)['code'] == 2:
+                #print('Dados =', self.__dados.get(i+1)['code'])
                 self.__dados[i + 1]['tensao'] += float(np.real(tens[m]))
                 self.__tensaoPlot[i + 1].append(self.__dados[i + 1]['tensao'])
                 m += 1
