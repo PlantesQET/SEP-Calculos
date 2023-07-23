@@ -7,7 +7,9 @@ class Newton:
     def __init__(self) -> None:
         print('Classe Newton Criada')
         self.__Sbase = 100e6
+
         self.__Sesp = dict()
+        self.__Sbarras = dict()
 
         self.__dados = dict()
         self.__tensaoPlot = dict()
@@ -28,6 +30,9 @@ class Newton:
         self.__J2 = list()
         self.__J3 = list()
         self.__J4 = list()
+
+        self.__x = list()
+
 
     def setBarra(self, barra, code, tensao, ang, carga, geracao):
         """
@@ -124,20 +129,23 @@ class Newton:
                     lin[j] = -1 * sum(lin)
             self.__ybus[i] = lin
 
-        self.__printYbus()
-
-        print(self.__dados)
-        for i in range(3):
-            print('Valor de i =',i+1)
+        for i in self.__dados:
+            #print('Valor de i =', len(self.__dados))
             if self.__dados.get(i)['code'] == 2:
                 self.__nPQ += 1
-                print(self.__nPQ)
-            elif self.__dados.get(i+1)['code'] == 3:
+                print('Valor de NPQ', self.__nPQ)
+            elif self.__dados.get(i)['code'] == 3:
                 self.__nPV += 1
-                print(self.__nPV)
+                print('Valor de NPV', self.__nPV)
             else:
-                return 'Erro!'
-    
+                print('Erro')
+                #return 'Erro!'
+        
+        self.__printYbus()
+        #print('O valor de nPQ={}, e nPV={}.'.format(self.__nPQ,self.__nPV))
+    def printValores(self):
+        print('O valor de nPQ={}, e nPV={}.'.format(self.__nPQ,self.__nPV))
+
     def Sinjetada(self):
         
         self.__Sinjetada = dict()
@@ -453,10 +461,10 @@ class Newton:
                 for j in range(len(J1[i])): h.append(J1[i][j])
                 for j in range(len(J2[i])): h.append(J2[i][j])
                 self.__Jacob[i] = np.hstack(h)
-            elif i >= J1:
+            elif i >= len(J1):
                 m = i - len(J1)
                 for j in range(len(J3[m])): k.append(J3[m][j])
-                for j in range(len(J3[m])): k.append(J3[m][j])
+                for j in range(len(J4[m])): k.append(J4[m][j])
                 self.__Jacob[i] = np.hstack(k)
 
         print(' ================== Matriz do Jacob ======================')
@@ -477,3 +485,85 @@ class Newton:
 
     def getDados(self):
         return self.__dados
+    
+    def linearSystem(self):
+        """
+            Método para palcular resultados do sistema linear
+            O sistema é do tipo:
+                [delta P delta Q] = [Jacobiana] . [Resultado]
+        """
+
+        self.__x = []
+
+        self.__x = np.linalg.solve(self.__Jacob, self.__deltaPeQ)
+        deucerto = np.allclose(np.dot(self.__Jacob, self.__x), self.__deltaPeQ) 
+        print('\n\t Due certo?', deucerto)
+
+        ang = []
+        tens = []
+
+        for i in range(len(self.__x)):
+            if i < (self.__nPQ + self.__nPV):
+                ang.append(self.__x[i])
+            else:
+                tens.append(self.__x[i])
+
+        m = 0
+        for i in range(len(self.__dados)):
+            #print('Valor de i agora =', i)
+            
+            if self.__dados.get(i+1)['code'] != 1:
+                
+                self.__dados[i + 1]['ang'] += float(np.real(ang[m]))
+                self.__angPlot[i + 1].append(self.__dados[i + 1]['ang'])
+                m += 1
+        
+        m = 0
+        for i in range(len(self.__dados)):
+            if self.__dados.get(i + 1)['code'] == 2:
+                self.__dados[i + 1]['tensao'] += float(np.real(tens[m]))
+                self.__tensaoPlot[i + 1].append(self.__dados[i + 1]['tensao'])
+                m += 1
+
+    def NovaInjecao(self):
+        """
+        Metodo utilizado para calcular o novo valor de injeção de potencia aparente nas barras de folga e PV.
+        (P e Q nas de folga e Q nas P)
+        """
+
+        self.__Sbarras = dict()
+
+        for i in self.__dados:
+            soma1 = []
+            soma2 = []
+            if self.__dados[i]['code'] != 2:
+                for j in self.__dados:
+                    soma1.append(
+                        #Potencia Ativa
+                        abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        mt.cos(np.angle(self.__ybus[i-1][j-1]) 
+                            - self.__dados.get(i)['ang'] 
+                            + self.__dados.get(j)['ang'])
+                    )
+
+                    soma2.append(
+                        #Potencia Reativa
+                        -abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__dados.get(i)['tensao']) *
+                        abs(self.__dados.get(j)['tensao']) *
+                        mt.sin(np.angle(self.__ybus[i-1][j-1]) 
+                            - self.__dados.get(i)['ang'] 
+                            + self.__dados.get(j)['ang'])
+                    )
+            if self.__dados[i]['code'] == 1:
+                self.__Sbarras = {'P' : np.real(sum(soma1)), 'Q' : np.imag(sum(soma1))}
+            elif self.__dados[i]['code'] == 3:
+                self.__Sbarras = {'P' : 0, 'Q' : np.imag(sum(soma2))}
+        
+        for i in self.__dados:
+            if self.__dados[i]['code'] == 1:
+                self.__dados[i]['geracao'] = self.__Sbarras.get(i)['P'] + self.__Sbarras.get(i)['Q'] * 1j
+            elif self.__dados[i]['code'] == 3:
+                self.__dados[i]['geracao'] = np.real(self.__dados.get(i)['geracao']) + self.__Sbarras.get(i)['Q'] * 1j
