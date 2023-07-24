@@ -567,3 +567,57 @@ class Newton:
                 self.__dados[i]['geracao'] = self.__Sbarras.get(i)['P'] + self.__Sbarras.get(i)['Q'] * 1j
             elif self.__dados[i]['code'] == 3:
                 self.__dados[i]['geracao'] = np.real(self.__dados.get(i)['geracao']) + self.__Sbarras.get(i)['Q'] * 1j
+    
+    def solveCircuito(self, erro=None, iteracoes=None, listTensao=None, listAng=None):
+        """
+            Método generico utilizado para resolver o circuito
+            : param erro: valor do erro utilizado para parar as iteracoes.
+            : param iteracoes: número de iteracoes que se deseja repetir o cálculo.
+                Obs.: Deve-se passar ou o número de iteracoes ou um número para o erro. 
+            : param listTensao: lista de tensões a serem calcuiladas no circuito. (Barras PQ)
+            : param listAng: Lista de angulos a serem calculados no ciruito. ( Barras PQ e PV)
+        """
+
+        self.__listTensao = listTensao
+        self.__listAng = listAng
+
+        self.count = 1
+
+        self.ybus()
+        self.Sinjetada()
+        self.setJacob(listTensao=self.__listTensao, listAng=self.__listAng)
+        self.linearSystem()
+
+        if iteracoes is None and erro is not None:
+            pEq = list(map(abs, self.__deltaPeQ))
+            teste = list(map(lambda m: True if (m<erro) else False, pEq))
+            stop = teste.count(False)
+            while True:
+                self.Sinjetada()
+                self.setJacob(listTensao=self.__listTensao, listAng=self.__listAng)
+                self.linearSystem()
+                self.count += 1
+                pEq = list(map(abs, self.__deltaPeQ))
+                teste = list(map(lambda m: True if (m<erro) else False, pEq))
+                stop = teste.count(False)
+                if stop == 0:
+                    break
+        elif iteracoes is not None and erro is None:
+            while self.count < iteracoes:
+                self.Sinjetada()
+                self.setJacob(listTensao=self.__listTensao, listAng=self.__listAng)
+                self.linearSystem()
+                self.count += 1
+                pEq = list(map(abs, self.__deltaPeQ))
+                #teste = list(map(lambda m: True if (m<erro)) else False, pEq)
+                #stop = teste.count(False)
+                #if stop == 0:
+                #    break
+        
+        self.NovaInjecao()
+        
+        if iteracoes is not None:
+            print('============ O número de iterracoes é: {} =============='.format(iteracoes) )
+        elif erro is not None:
+            print(' Convergiu para um erro de {}.'.format(erro))
+            print(f'Convergiu em {self.count} iterações.')
