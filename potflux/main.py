@@ -15,28 +15,5 @@ Exemplo.ligacoes(2,3, impedancia=0.01 + 0.09j)
 
 Exemplo.printLigacoes()
 
-#Exemplo.ybus()
-#Exemplo.Sinjetada()
-#Exemplo.setJacob(listTensao=[2], listAng=[2,3])
-
-#print('Os dados de dados', Exemplo.getDados().get(0)['code'])
-
-#Exemplo.linearSystem()
-
 Exemplo.solveCircuito(iteracoes=5,listTensao=[2],listAng=[2,3])
 
-nPQA = 0
-nPVA = 0 
-
-#for i in Exemplo.getDados():
-#    print('Valor de i =', Exemplo.getDados().get(i)['code'])
-#    if Exemplo.getDados().get(i)['code'] == 2:
-#        nPQA += 1
-#        
-#    elif Exemplo.getDados().get(i)['code'] == 3:
-#        nPVA += 1
-#        
-#    else:
-#        print('Erro')
-#print('O valor de nPQ={}, e nPV={}.'.format(nPQA,nPVA))
-#

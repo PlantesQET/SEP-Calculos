@@ -540,27 +540,27 @@ class Newton:
                 for j in self.__dados:
                     soma1.append(
                         #Potencia Ativa
-                        abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__ybus[i - 1][j - 1]) *
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        mt.cos(np.angle(self.__ybus[i-1][j-1]) 
+                        mt.cos(np.angle(self.__ybus[i - 1][j - 1]) 
                             - self.__dados.get(i)['ang'] 
                             + self.__dados.get(j)['ang'])
                     )
 
                     soma2.append(
                         #Potencia Reativa
-                        -abs(self.__ybus[i-1][j-1]) *
+                        -abs(self.__ybus[i - 1][j - 1]) *
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        mt.sin(np.angle(self.__ybus[i-1][j-1]) 
+                        mt.sin(np.angle(self.__ybus[i - 1][j - 1]) 
                             - self.__dados.get(i)['ang'] 
                             + self.__dados.get(j)['ang'])
                     )
             if self.__dados[i]['code'] == 1:
-                self.__Sbarras = {'P' : np.real(sum(soma1)), 'Q' : np.imag(sum(soma1))}
+                self.__Sbarras[i] = {'P' : np.real(sum(soma1)), 'Q' : np.imag(sum(soma2))}
             elif self.__dados[i]['code'] == 3:
-                self.__Sbarras = {'P' : 0, 'Q' : np.imag(sum(soma2))}
+                self.__Sbarras[i] = {'P' : 0, 'Q' : np.imag(sum(soma2))}
         
         for i in self.__dados:
             if self.__dados[i]['code'] == 1:
