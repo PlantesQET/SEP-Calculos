@@ -17,5 +17,7 @@ Exemplo.printLigacoes()
 
 Exemplo.solveCircuito(iteracoes=25,listTensao=[2],listAng=[2,3])
 
-Exemplo.Tensoes(print=True)
-Exemplo.Correntes(print=True)
+# Exemplo.Tensoes(print=True)
+# Exemplo.Correntes(print=True)
+
+Exemplo.FluxoS(prinTensao=True, printCorrentes=True)

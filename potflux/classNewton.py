@@ -661,7 +661,7 @@ class Newton:
                                         self.__ybus[i - 1][j - 1])
                 soma.append((self.__V.get(i) - self.__V.get(j)) * 
                                         self.__ybus[i - 1][j - 1])
-            self.__I[(i, j)] = sum(soma)
+            self.__I[(i, i)] = sum(soma)
         
         if print:
             self.__printCorrentes()
@@ -677,8 +677,9 @@ class Newton:
         for i in self.__I:
             a = i[0]
             # O sinal negativo foi colocado para ficar no sentido correto
-            self.FluxoS[i] = -self.__V.get(a) * np.conjugate(self.__I.get(i))
+            self.__fluxoS[i] = -self.__V.get(a) * np.conjugate(self.__I.get(i))
         print('\n ================================== Fluxo de Potência ==================================')
+
         for i in self.__fluxoS:
             print('Ligação: \t', i, '\tFluxoS =\t', self.__fluxoS.get(i), '\t[pu]' )
         print(' ==================================                   ==================================')
