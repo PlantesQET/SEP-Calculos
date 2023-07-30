@@ -37,6 +37,7 @@ class Newton:
         self.__V = dict()
         self.__I = dict()
         self.__fluxoS = dict()
+        self.__Perdas = 0 
 
     def setBarra(self, barra, code, tensao, ang, carga, geracao):
         """
@@ -687,3 +688,14 @@ class Newton:
         for i in self.__dados:
             if self.__dados.get(i)['code'] != 2:
                 self.__dados[i]['geracao'] = self.__fluxoS.get((i, i))
+
+    def Perdas(self):
+        self.__Perdas = 0
+        perdas = []
+
+        for i in self.__fluxoS:
+            perdas.append(self.__fluxoS.get(i))
+
+        self.__Perdas = sum(perdas)
+        print('\n ================================== PERDAS: ==================================')
+        print(self.__Perdas, '\t[pu]')
