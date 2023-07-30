@@ -33,6 +33,9 @@ class Newton:
 
         self.__x = list()
 
+        # Printaveis
+        self.__V = dict()
+        self.__I = dict()
 
     def setBarra(self, barra, code, tensao, ang, carga, geracao):
         """
@@ -191,7 +194,7 @@ class Newton:
         for i in range(len(self.__ResiduoQ)):
             self.__deltaPeQ.append(self.__ResiduoQ[i])
 
-        for i in self.__deltaPeQ: print(i)
+        #for i in self.__deltaPeQ: print(i)
 
     def __setJ1(self, listAng, nPQ, nPV):
         """
@@ -244,7 +247,7 @@ class Newton:
                     self.__J1[i][j] = np.real(outDiagonal[m])
                     m += 1
         
-        print('\n J1 = \n', self.__J1)
+        #print('\n J1 = \n', self.__J1)
         
         return self.__J1
     
@@ -307,8 +310,8 @@ class Newton:
                         self.__J2[i][j] = np.real(outDiagonal[m])
                         m += 1
         
-        print('\n K = ', k, '\n')
-        print('\n J2 = \n', self.__J2)
+        #print('\n K = ', k, '\n')
+        #print('\n J2 = \n', self.__J2)
         
         return self.__J2
 
@@ -371,7 +374,7 @@ class Newton:
                         m += 1
         
 
-        print('\n J3 = \n', self.__J3)
+        #print('\n J3 = \n', self.__J3)
         
         return self.__J3
     
@@ -431,7 +434,7 @@ class Newton:
                     m += 1
         
         #print('\n K = ', k, '\n')
-        print('\n J4 = \n', self.__J4)
+        #print('\n J4 = \n', self.__J4)
         
         return self.__J4
     
@@ -443,7 +446,6 @@ class Newton:
         self.__Jacob = []
         self.__listTensao = listTensao
         self.__listAng = listAng
-
         nXn = len(listTensao) + len(listAng)
 
         J1 = self.__setJ1(listAng, self.__nPQ, self.__nPV)
@@ -467,6 +469,7 @@ class Newton:
                 for j in range(len(J4[m])): k.append(J4[m][j])
                 self.__Jacob[i] = np.hstack(k)
 
+        
         print(' ================== Matriz do Jacob ======================')
 
         print('\nJ1 = ')
@@ -482,6 +485,7 @@ class Newton:
         for i in self.__Jacob: print(i)
 
         print(' =========================================================')
+        
 
     def getDados(self):
         return self.__dados
@@ -497,7 +501,7 @@ class Newton:
 
         self.__x = np.linalg.solve(self.__Jacob, self.__deltaPeQ)
         deucerto = np.allclose(np.dot(self.__Jacob, self.__x), self.__deltaPeQ) 
-        print('\n\t Due certo?', deucerto)
+        #print('\n\t Due certo?', deucerto)
 
         ang = []
         tens = []
@@ -608,11 +612,7 @@ class Newton:
                 self.setJacob(listTensao=self.__listTensao, listAng=self.__listAng)
                 self.linearSystem()
                 self.count += 1
-                pEq = list(map(abs, self.__deltaPeQ))
-                #teste = list(map(lambda m: True if (m<erro)) else False, pEq)
-                #stop = teste.count(False)
-                #if stop == 0:
-                #    break
+                #pEq = list(map(abs, self.__deltaPeQ))
         
         self.NovaInjecao()
         
@@ -621,3 +621,46 @@ class Newton:
         elif erro is not None:
             print(' Convergiu para um erro de {}.'.format(erro))
             print(f'Convergiu em {self.count} iterações.')
+    
+    def __printTensao(self):
+        print('\n ================== TENSÕES ==================')
+        for i in self.__V:
+            print('Barra: \t', i, '\tTensão =\t', self.__V.get(i), '\t[pu]' )
+        print('\n ==================         ==================')
+
+    def Tensoes(self, print=None):
+    
+        self.__V = dict()
+        for i in self.__dados:
+            self.__V[i] = cmt.rect(self.__dados.get(i)['tensao'],
+                                   self.__dados.get(i)['ang'])
+        
+        if print:
+            self.__printTensao()
+    
+    def __printCorrentes(self):
+        print('\n ================== CORRENTES ==================')
+        for i in self.__I:
+            print('Ligação: \t', i, '\tCorrente =\t', self.__I.get(i), '\t[pu]' )
+        print('\n ==================           ==================')
+
+    def Correntes(self, print=None):
+    
+        self.__I = dict()
+        self.Tensoes(print=False)
+
+
+        for i in self.__dados:
+            soma = []
+            for j in self.__dados:
+                if i==j:
+                    continue
+                else:
+                    self.__I[(i, j)] = ((self.__V.get(i) - self.__V.get(j)) * 
+                                        self.__ybus[i - 1][j - 1])
+                soma.append((self.__V.get(i) - self.__V.get(j)) * 
+                                        self.__ybus[i - 1][j - 1])
+            self.__I[(i, j)] = sum(soma)
+        
+        if print:
+            self.__printCorrentes()
