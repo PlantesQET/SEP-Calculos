@@ -36,6 +36,7 @@ class Newton:
         # Printaveis
         self.__V = dict()
         self.__I = dict()
+        self.__fluxoS = dict()
 
     def setBarra(self, barra, code, tensao, ang, carga, geracao):
         """
@@ -664,3 +665,24 @@ class Newton:
         
         if print:
             self.__printCorrentes()
+
+    def FluxoS(self, prinTensao=None, printCorrentes=None):
+        """Metodo que realiza o fluxo de potencia"""
+
+        self.__fluxoS = dict()
+
+        self.Tensoes(print=prinTensao)
+        self.Correntes(print=printCorrentes)
+
+        for i in self.__I:
+            a = i[0]
+            # O sinal negativo foi colocado para ficar no sentido correto
+            self.FluxoS[i] = -self.__V.get(a) * np.conjugate(self.__I.get(i))
+        print('\n ================================== Fluxo de Potência ==================================')
+        for i in self.__fluxoS:
+            print('Ligação: \t', i, '\tFluxoS =\t', self.__fluxoS.get(i), '\t[pu]' )
+        print(' ==================================                   ==================================')
+
+        for i in self.__dados:
+            if self.__dados.get(i)['code'] != 2:
+                self.__dados[i]['geracao'] = self.__fluxoS.get((i, i))
