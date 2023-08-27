@@ -15,10 +15,26 @@ Exemplo.ligacoes(2,3, impedancia=0.0125 + 0.025j)
 
 Exemplo.printLigacoes()
 
-Exemplo.solveCircuito(iteracoes=25,listTensao=[2],listAng=[2,3])
+"""
+        ================================
+        Batch Teste
+        ================================
+"""
+Exemplo.Sinjetada()
+Exemplo.setJacob(listTensao=[2], listAng=[2,3])
+Exemplo.linearSystem()
 
-# Exemplo.Tensoes(print=True)
-# Exemplo.Correntes(print=True)
+"""
+        ================================
+        Batch normal
+        ================================
+"""
+
+
+"""Exemplo.solveCircuito(iteracoes=25,listTensao=[2],listAng=[2,3])
+
+Exemplo.Tensoes(print=True)
+Exemplo.Correntes(print=True)
 
 Exemplo.FluxoS(prinTensao=True, printCorrentes=True)
-Exemplo.Perdas()
+Exemplo.Perdas()"""

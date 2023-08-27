@@ -163,22 +163,22 @@ class Newton:
             soma2 = []
             if self.__dados[i]['code'] != 1:
                 for j in self.__dados:
+                    #Potencia Ativa
                     soma1.append(
-                        #Potencia Ativa
-                        abs(self.__ybus[i-1][j-1]) *
+                        abs(self.__ybus[i - 1][j - 1]) *
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        mt.cos(np.angle(self.__ybus[i-1][j-1]) 
+                        mt.cos(np.angle(self.__ybus[i - 1][j - 1]) 
                             - self.__dados.get(i)['ang'] 
                             + self.__dados.get(j)['ang'])
                     )
-
+                    #Potencia Reativa
                     soma2.append(
-                        #Potencia Reativa
-                        -abs(self.__ybus[i-1][j-1]) *
+                        
+                        -abs(self.__ybus[i - 1][j - 1]) *
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        mt.sin(np.angle(self.__ybus[i-1][j-1]) 
+                        mt.sin(np.angle(self.__ybus[i - 1][j - 1]) 
                             - self.__dados.get(i)['ang'] 
                             + self.__dados.get(j)['ang'])
                     )
@@ -274,15 +274,15 @@ class Newton:
             for j in range(1,len(self.__dados) + 1, 1):
                 if i != j:
                     soma.append(
-                        abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__ybus[i - 1][j - 1]) * 
                         abs(self.__dados.get(j)['tensao']) *
-                        cmt.cos(cmt.phase(self.__ybus[i-1][j-1])- 
+                        cmt.cos(cmt.phase(self.__ybus[i - 1][j - 1]) - 
                                 self.__dados.get(i)['ang'] +
                                 self.__dados.get(j)['ang']
                                 )
                     )
-            a = (   2 * abs(self.__dados.get(i)['tensao']) * abs(self.__ybus[i-1][i-1]) *
-                    cmt.cos(cmt.phase(self.__ybus[i-1][i-1])))
+            a = (   2 * abs(self.__dados.get(i)['tensao']) * abs(self.__ybus[i - 1][i - 1]) *
+                    cmt.cos(cmt.phase(self.__ybus[i - 1][i - 1])))
             
             mainDiagonal.append(a + sum(soma))
         
@@ -292,7 +292,7 @@ class Newton:
                     outDiagonal.append(
                         abs(self.__ybus[i-1][j-1]) * 
                         abs(self.__dados.get(i)['tensao']) *
-                        cmt.cos(cmt.phase(self.__ybus[i-1][j-1])- 
+                        cmt.cos(cmt.phase(self.__ybus[i - 1][j - 1]) - 
                                 self.__dados.get(i)['ang'] +
                                 self.__dados.get(j)['ang']
                                 )
@@ -317,8 +317,6 @@ class Newton:
         
         return self.__J2
 
-
-
     def __setJ3(self, listTensao, listAng, nPQ, nPV):
         """
         Método privado usado para calcular a submatriz J2 da matriz Jacobiana
@@ -336,13 +334,13 @@ class Newton:
 
         for i in listAng:
             soma = []
-            for j in range(1,len(self.__dados) + 1, 1):
+            for j in range(1, len(self.__dados) + 1, 1):
                 if i != j:
                     soma.append(
-                        abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__ybus[i - 1][j - 1]) * 
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        cmt.cos(cmt.phase(self.__ybus[i-1][j-1]) - 
+                        cmt.cos(cmt.phase(self.__ybus[i - 1][j - 1]) - 
                                 self.__dados.get(i)['ang'] +
                                 self.__dados.get(j)['ang']
                                 )
@@ -354,10 +352,10 @@ class Newton:
             for j in listTensao:
                 if i != j:
                     outDiagonal.append(
-                        -abs(self.__ybus[i-1][j-1]) * 
+                        -abs(self.__ybus[i - 1][j - 1]) * 
                         abs(self.__dados.get(i)['tensao']) *
                         abs(self.__dados.get(j)['tensao']) *
-                        cmt.cos(cmt.phase(self.__ybus[i-1][j-1])- 
+                        cmt.cos(cmt.phase(self.__ybus[i - 1][j - 1])- 
                                 self.__dados.get(i)['ang'] +
                                 self.__dados.get(j)['ang']
                                 )
@@ -368,16 +366,13 @@ class Newton:
                 if j < nPV:
                     self.__J3[i][j] = np.real(outDiagonal[m])
                     m += 1
-                elif j >= nPV:
+                elif i >= nPV:
                     if j - nPV == i:
                         self.__J3[i][j] = np.real(mainDiagonal[i + nPV])
                     else:
                         self.__J3[i][j] = np.real(outDiagonal[m])
                         m += 1
-        
-
         #print('\n J3 = \n', self.__J3)
-        
         return self.__J3
     
 
@@ -399,12 +394,12 @@ class Newton:
         for i in listAng:
             soma = []
             a = 0
-            for j in range(1,len(self.__dados) + 1, 1):
+            for j in range(1, len(self.__dados) + 1, 1):
                 if i != j:
                     soma.append(
-                        abs(self.__ybus[i-1][j-1]) * 
+                        abs(self.__ybus[i - 1][j - 1]) * 
                         abs(self.__dados.get(j)['tensao']) *
-                        cmt.sin(cmt.phase(self.__ybus[i-1][j-1])- 
+                        cmt.sin(cmt.phase(self.__ybus[i - 1][j - 1]) - 
                                 self.__dados.get(i)['ang'] +
                                 self.__dados.get(j)['ang']
                                 )
@@ -441,7 +436,6 @@ class Newton:
         return self.__J4
     
     def setJacob(self, listTensao, listAng):
-
         
         print(f'Barras PQ = {self.__nPQ} e PV = {self.__nPV}')
 
@@ -563,6 +557,7 @@ class Newton:
                             - self.__dados.get(i)['ang'] 
                             + self.__dados.get(j)['ang'])
                     )
+                    
             if self.__dados[i]['code'] == 1:
                 self.__Sbarras[i] = {'P' : np.real(sum(soma1)), 'Q' : np.imag(sum(soma2))}
             elif self.__dados[i]['code'] == 3:
